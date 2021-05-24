@@ -9,6 +9,12 @@ import (
 )
 
 func main() {
+	if len(os.Args) == 1 {
+		fmt.Println("This script is not intended to be ran directly.")
+		fmt.Println("See https://github.com/nint8835/deploy-keychain/README.md for usage and configuration details.")
+		return
+	}
+
 	config, err := deploykeychain.LoadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading config: %s", err)
