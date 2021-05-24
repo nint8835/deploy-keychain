@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
@@ -153,5 +154,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	log(keyFile)
+	args := append([]string{"-i", keyFile}, os.Args[1:]...)
+	log(fmt.Sprintf("Running %s with args %+v", config.SSHCommand, args))
+
+	cmd := exec.Command(config.SSHCommand, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error running SSH: %s\n", err)
+		os.Exit(1)
+	}
 }
