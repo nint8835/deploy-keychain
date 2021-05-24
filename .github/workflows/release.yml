@@ -48,8 +48,8 @@ jobs:
           GEMFURY_TOKEN: ${{ secrets.GEMFURY_TOKEN }}
         run: |
           for f in dist/*.deb; do
-            curl -F package=@f https://{$GEMFURY_TOKEN}@push.fury.io/nint8835
+            curl -F package=@$f https://{$GEMFURY_TOKEN}@push.fury.io/nint8835
           done
           for f in dist/*.rpm; do
-            curl -F package=@f https://{$GEMFURY_TOKEN}@push.fury.io/nint8835
+            curl -F package=@$f https://{$GEMFURY_TOKEN}@push.fury.io/nint8835
           done
