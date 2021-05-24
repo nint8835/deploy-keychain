@@ -43,3 +43,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_PAT: ${{ secrets.HOMEBREW_PAT }}
+      - name: Push to Gemfury
+        env:
+          GEMFURY_TOKEN: ${{ secrets.GEMFURY_TOKEN }}
+        run: |
+          curl -F package=@dist/*.deb https://{$GEMFURY_TOKEN}@push.fury.io/nint8835
+          curl -F package=@dist/*.yum https://{$GEMFURY_TOKEN}@push.fury.io/nint8835
