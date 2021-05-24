@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if len(os.Args) == 1 {
-		fmt.Println("This script is not intended to be ran directly.")
+		fmt.Println("This tool is not intended to be ran directly.")
 		fmt.Println("See https://github.com/nint8835/deploy-keychain/README.md for usage and configuration details.")
 		return
 	}
