@@ -19,3 +19,6 @@
 
 # Testing config
 /deploy-keychain.yml
+
+# Goreleaser builds
+dist/

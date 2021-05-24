@@ -1,0 +1,48 @@
+before:
+  hooks:
+    - go mod download
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+archives:
+  - replacements:
+      darwin: macos
+nfpms:
+  -
+    homepage: https://github.com/nint8835/deploy-keychain
+    maintainer: nint8835 <riley@rileyflynn.me>
+    description: Command-line tool to permit the easy usage of multiple GitHub deploy keys simultaneously.
+    license: MIT
+    formats:
+      - apk
+      - deb
+      - rpm
+    section: default
+    priority: extra
+brews:
+  -
+    tap:
+      owner: nint8835
+      name: homebrew-formulae
+      token: "{{ .Env.HOMEBREW_PAT }}"
+    commit_author:
+      name: GoReleaser Bot
+      email: goreleaser@rileyflynn.me
+    folder: Formula
+    homepage: https://github.com/nint8835/deploy-keychain
+    description: Command-line tool to permit the easy usage of multiple GitHub deploy keys simultaneously.
+    license: MIT
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
