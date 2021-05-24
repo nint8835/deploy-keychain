@@ -36,7 +36,6 @@ type Config struct {
 	FallbackKey string `mapstructure:"fallback_key"`
 }
 
-var config Config
 var debug bool
 
 func log(message string) {
@@ -46,8 +45,8 @@ func log(message string) {
 }
 
 // IdentifyRepository attempts to identify the repository being interacted with from the arguments provided to SSH by Git.
-func IdentifyRepository() (string, string, error) {
-	for _, argument := range os.Args {
+func IdentifyRepository(args []string) (string, string, error) {
+	for _, argument := range args {
 		argParts := strings.Split(argument, " ")
 		for _, part := range argParts {
 			match := repoNameRegexp.FindStringSubmatch(part)
@@ -62,7 +61,7 @@ func IdentifyRepository() (string, string, error) {
 }
 
 // LoadConfig loads & populates the config for this tool.
-func LoadConfig() error {
+func LoadConfig() (Config, error) {
 	viper.SetConfigName("deploy-keychain")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("$HOME/.deploy-keychain")
@@ -70,7 +69,7 @@ func LoadConfig() error {
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return fmt.Errorf("error getting user's home directory: %w", err)
+		return Config{}, fmt.Errorf("error getting user's home directory: %w", err)
 	}
 
 	viper.SetDefault("key_path", path.Join(homeDir, ".ssh", "deploy-keys"))
@@ -83,18 +82,20 @@ func LoadConfig() error {
 		log(fmt.Sprintf("Unable to load config file: %s\n", err))
 	}
 
-	err = viper.Unmarshal(&config)
+	config := new(Config)
+
+	err = viper.Unmarshal(config)
 	if err != nil {
-		return fmt.Errorf("error unmarshalling config: %w", err)
+		return Config{}, fmt.Errorf("error unmarshalling config: %w", err)
 	}
 
 	log(fmt.Sprintf("Config loaded: %+v", config))
 
-	return nil
+	return *config, nil
 }
 
 // DetermineKeyFile will, given a repository, attempt to determine a SSH key to use for the repository.
-func DetermineKeyFile(account, repository string) (string, error) {
+func DetermineKeyFile(config Config, account, repository string) (string, error) {
 	keyFile, found := config.Keys[fmt.Sprintf("%s/%s", account, repository)]
 	if found {
 		log(fmt.Sprintf("Found key via custom keys map: %s", keyFile))
@@ -133,20 +134,20 @@ func main() {
 	}
 	debug, _ = strconv.ParseBool(debugVar)
 
-	err := LoadConfig()
+	config, err := LoadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading config: %s", err)
 	}
 
 	log(fmt.Sprintf("Args: %s", os.Args))
 
-	account, repository, err := IdentifyRepository()
+	account, repository, err := IdentifyRepository(os.Args)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Unable to determine what repository is being used.")
 		os.Exit(1)
 	}
 
-	keyFile, err := DetermineKeyFile(account, repository)
+	keyFile, err := DetermineKeyFile(config, account, repository)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to determine key: %s\n", err)
 		os.Exit(1)
